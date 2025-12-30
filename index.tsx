@@ -3032,5 +3032,3 @@ export default definePlugin({
     openLogsGUI,
     openVoiceLogsModalLocal
 });
-
-// Test comment - symlink verification - [add a timestamp or random number here]
