@@ -11,3 +11,8 @@ A lightweight Vencord plugin that tracks voice channel joins and leaves in real-
 - 🎨 **Modern UI**: Beautiful modal interface with filtering and pagination
 - 💾 **Persistent Storage**: Logs are saved and persist across Discord restarts
 - 🔧 **Highly Configurable**: Extensive settings to customize behavior
+
+<img width="813" height="574" alt="image" src="https://github.com/user-attachments/assets/3e76e346-a9d2-484d-a9ae-7682f6b3023f" />
+
+## 🛠 Installation
+- See [here](https://github.com/Its2Factor/vencord-userplugins#install) and the [Vencord docs for installing custom plugins](https://docs.vencord.dev/installing/custom-plugins/)
