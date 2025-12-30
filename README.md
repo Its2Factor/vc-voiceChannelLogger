@@ -12,7 +12,7 @@ Voice channel logger that tracks joins and leaves in real time with timestamps a
 - 🎨 **Modern UI**: Beautiful modal interface with filtering and pagination
 - 💾 **Persistent Storage**: Logs are saved and persist across Discord restarts
 - 🔧 **Highly Configurable**: Extensive settings to customize behavior
-- 🔗 Context Menu Integration: Adds right-click functionality with [UserVoiceShow](https://vencord.dev/plugins/UserVoiceShow) and [FollowUser](https://github.com/D3SOX/vc-followUser) for quick access to actions
+- 🔗 Context Menu Integration: Adds integration with [UserVoiceShow](https://vencord.dev/plugins/UserVoiceShow), and adds right-click functionality with [FollowUser](https://github.com/D3SOX/vc-followUser) for quick access to actions
 
 <img width="813" height="574" alt="image1" src="https://github.com/user-attachments/assets/07572396-f194-48f0-98d4-1753caf9cb4a" />
 
