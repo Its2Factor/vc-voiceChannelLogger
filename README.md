@@ -7,6 +7,7 @@ Voice channel logger that tracks joins and leaves in real time with timestamps a
 
 - 📊 **Real-time Logging**: Track voice channel activity as it happens
 - 🔍 **Advanced Search**: Search logs by user, channel, or action type
+- 👤 **Filter by User**: Filter logs to show only entries for a specific user (via context menu or search)
 - 📱 **Toast Notifications**: Get notified when users join/leave (configurable)
 - ⏱️ **Session Duration Tracking**: See how long users stay in voice channels
 - 🎨 **Modern UI**: Beautiful modal interface with filtering and pagination
