@@ -1,6 +1,7 @@
 # VoiceChannelLogger
 
 Voice channel logger that tracks joins and leaves in real time with timestamps and user details
+
 <br>
 
 ## Features
