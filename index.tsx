@@ -181,7 +181,7 @@ try {
 // This will be initialized in the plugin's start() method
 async function loadUserVoiceShowComponent() {
     if (VoiceChannelIndicator !== null) return; // Already loaded
-    
+
     try {
         const userVoiceShowModule = await import("@plugins/userVoiceShow/components");
         VoiceChannelIndicator = userVoiceShowModule.VoiceChannelIndicator;
@@ -1257,7 +1257,7 @@ function VoiceLogsModal({ modalProps, initialSearchTerm, initialUserId }: { moda
     const [currentUserId, setCurrentUserId] = useState<string | undefined>(initialUserId);
 
     // Autocomplete suggestions state
-    const [suggestions, setSuggestions] = useState<Array<{ type: "user" | "channel"; value: string; display: string; userId?: string; avatarUrl?: string }>>([]);
+    const [suggestions, setSuggestions] = useState<Array<{ type: "user" | "channel"; value: string; display: string; userId?: string; avatarUrl?: string; }>>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
 
@@ -1440,7 +1440,7 @@ function VoiceLogsModal({ modalProps, initialSearchTerm, initialUserId }: { moda
 
                 return { log, score: searchScore };
             })
-            .filter((item): item is { log: LogEntry; score: number } => item !== null)
+            .filter((item): item is { log: LogEntry; score: number; } => item !== null)
             .sort((a, b) => b.score - a.score) // Sort by score descending (best matches first)
             .map(item => item.log);
 
@@ -1457,12 +1457,12 @@ function VoiceLogsModal({ modalProps, initialSearchTerm, initialUserId }: { moda
      * Extracts unique usernames, global names, user IDs, and channel names
      * Filters and ranks suggestions based on current search term
      */
-    const generateSuggestions = React.useCallback((term: string, logEntries: LogEntry[]): Array<{ type: "user" | "channel"; value: string; display: string; userId?: string; avatarUrl?: string }> => {
+    const generateSuggestions = React.useCallback((term: string, logEntries: LogEntry[]): Array<{ type: "user" | "channel"; value: string; display: string; userId?: string; avatarUrl?: string; }> => {
         if (!term || term.trim().length === 0) return [];
 
         const termLower = term.toLowerCase().trim();
-        const suggestionsMap = new Map<string, { type: "user" | "channel"; value: string; display: string; score: number; userId?: string; avatarUrl?: string }>();
-        const userSuggestionsMap = new Map<string, { type: "user" | "channel"; value: string; display: string; score: number; userId?: string; avatarUrl?: string }>();
+        const suggestionsMap = new Map<string, { type: "user" | "channel"; value: string; display: string; score: number; userId?: string; avatarUrl?: string; }>();
+        const userSuggestionsMap = new Map<string, { type: "user" | "channel"; value: string; display: string; score: number; userId?: string; avatarUrl?: string; }>();
 
         // Extract unique values from logs
         for (const log of logEntries) {
@@ -1588,7 +1588,7 @@ function VoiceLogsModal({ modalProps, initialSearchTerm, initialUserId }: { moda
         return Array.from(suggestionsMap.values())
             .sort((a, b) => b.score - a.score)
             .slice(0, 8)
-            .map(({ type, value, display, userId, avatarUrl }): { type: "user" | "channel"; value: string; display: string; userId?: string; avatarUrl?: string } => ({ type, value, display, userId, avatarUrl }));
+            .map(({ type, value, display, userId, avatarUrl }): { type: "user" | "channel"; value: string; display: string; userId?: string; avatarUrl?: string; } => ({ type, value, display, userId, avatarUrl }));
     }, []);
 
     // Update suggestions when search term changes (with debouncing)
@@ -3032,3 +3032,5 @@ export default definePlugin({
     openLogsGUI,
     openVoiceLogsModalLocal
 });
+
+// Test comment - symlink verification - [add a timestamp or random number here]
