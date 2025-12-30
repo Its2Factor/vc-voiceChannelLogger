@@ -1,4 +1,4 @@
-# Voice Channel Logger
+# VoiceChannelLogger
 
 A lightweight Vencord plugin that tracks voice channel joins and leaves in real-time with timestamps and user details.
 
@@ -15,4 +15,4 @@ A lightweight Vencord plugin that tracks voice channel joins and leaves in real-
 <img width="813" height="574" alt="image" src="https://github.com/user-attachments/assets/3e76e346-a9d2-484d-a9ae-7682f6b3023f" />
 
 ## 🛠 Installation
-- See [here](https://github.com/Its2Factor/vencord-userplugins#install) and the [Vencord docs for installing custom plugins](https://docs.vencord.dev/installing/custom-plugins/)
+- See [here](https://github.com/Its2Factor/vencord-userplugins?tab=readme-ov-file#-installation) and the [Vencord docs for installing custom plugins](https://docs.vencord.dev/installing/custom-plugins/)
