@@ -2574,8 +2574,8 @@ const userContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
 // Main plugin definition with error handling
 export default definePlugin({
     name: "VoiceChannelLogger",
-    description: "Lightweight voice channel logger that tracks joins and leaves in real time with timestamps and user details.",
-    authors: [{ name: "kylie", id: 624679903068946454n }],
+    description: "Voice channel logger that tracks joins and leaves in real time with timestamps and user details",
+    authors: [{ name: "2Factor", id: 624679903068946454n }],
 
     settings,
 
