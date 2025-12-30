@@ -1,6 +1,8 @@
 # VoiceChannelLogger
 
 A lightweight Vencord plugin that tracks voice channel joins and leaves in real-time with timestamps and user details.
+<br>
+(Also has intergration with [UserVoiceShow](https://vencord.dev/plugins/UserVoiceShow) and [FollowUser](https://github.com/D3SOX/vc-followUser))
 
 ## Features
 
