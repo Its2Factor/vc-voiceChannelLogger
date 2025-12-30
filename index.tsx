@@ -13,7 +13,6 @@ import { definePluginSettings, Settings, SettingsStore } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { openPluginModal } from "@components/settings";
-import { VoiceChannelIndicator } from "@plugins/userVoiceShow/components";
 import { Logger } from "@utils/Logger";
 import { ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
@@ -131,6 +130,7 @@ let VoiceStateStore: any;
 let UserMentionComponent: any;
 let HeaderBarIcon: any;
 let ChannelActions: any;
+let VoiceChannelIndicator: any = null;
 
 try {
     VoiceStateStore = findByPropsLazy("getVoiceStatesForChannel", "getCurrentClientVoiceChannelId");
@@ -175,6 +175,20 @@ try {
             style: { background: "none", border: "none", cursor: "pointer" }
         }, icon());
     };
+}
+
+// Lazy-load UserVoiceShow component (optional dependency)
+// This will be initialized in the plugin's start() method
+async function loadUserVoiceShowComponent() {
+    if (VoiceChannelIndicator !== null) return; // Already loaded
+    
+    try {
+        const userVoiceShowModule = await import("@plugins/userVoiceShow/components");
+        VoiceChannelIndicator = userVoiceShowModule.VoiceChannelIndicator;
+    } catch (error) {
+        // UserVoiceShow plugin not installed, VoiceChannelIndicator will remain null
+        // This is expected and handled gracefully in the rendering code
+    }
 }
 
 // Logger instance with descriptive color for console output
@@ -1104,23 +1118,25 @@ function LogEntryRow({ log, onCloseModal, onFilterToUser, onSetSearchTerm, onHid
                         </span>
                     )}
 
-                    {/* Voice channel indicator - shows icon if user is currently in VC */}
-                    <div
-                        onClickCapture={e => {
-                            // Capture phase fires before VoiceChannelIndicator's onClick
-                            // Check if the click target is within the voice indicator
-                            const target = e.target as HTMLElement;
-                            if (target.closest("[role=\"button\"]") || target.getAttribute("role") === "button") {
-                                // Close modal immediately - closing won't interfere with navigation
-                                if (onCloseModal) {
-                                    onCloseModal();
+                    {/* Voice channel indicator - shows icon if user is currently in VC (only if UserVoiceShow plugin is enabled) */}
+                    {isPluginEnabled("UserVoiceShow") && VoiceChannelIndicator && (
+                        <div
+                            onClickCapture={e => {
+                                // Capture phase fires before VoiceChannelIndicator's onClick
+                                // Check if the click target is within the voice indicator
+                                const target = e.target as HTMLElement;
+                                if (target.closest("[role=\"button\"]") || target.getAttribute("role") === "button") {
+                                    // Close modal immediately - closing won't interfere with navigation
+                                    if (onCloseModal) {
+                                        onCloseModal();
+                                    }
                                 }
-                            }
-                        }}
-                        style={{ display: "inline-flex" }}
-                    >
-                        <VoiceChannelIndicator userId={log.userId} />
-                    </div>
+                            }}
+                            style={{ display: "inline-flex" }}
+                        >
+                            <VoiceChannelIndicator userId={log.userId} />
+                        </div>
+                    )}
                 </div>
 
                 {/* Channel Info Below Username */}
@@ -2939,6 +2955,9 @@ export default definePlugin({
         logger.info("  - Vencord.Plugins.plugins.VoiceChannelLoggerMinimal.clearLogs() - Clear all logs");
         logger.info("  - Vencord.Plugins.plugins.VoiceChannelLoggerMinimal.openLogsInConsole() - Display logs in console");
         logger.info("  - Vencord.Plugins.plugins.VoiceChannelLoggerMinimal.openLogsGUI() - Open logs GUI modal");
+
+        // Try to load UserVoiceShow component if available
+        await loadUserVoiceShowComponent();
 
         // Reset all plugin state to ensure clean startup
         this.resetPluginState();
