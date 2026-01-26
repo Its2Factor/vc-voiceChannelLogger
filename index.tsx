@@ -163,7 +163,7 @@ try {
 }
 
 try {
-    HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
+    HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '"aria-haspopup":');
 } catch (error) {
     console.warn("VoiceChannelLogger: Failed to find HeaderBarIcon", error);
     // Fallback to a simple button
@@ -917,17 +917,17 @@ function LogEntryRow({ log, onCloseModal, onFilterToUser, onSetSearchTerm, onHid
         e.preventDefault();
         e.stopPropagation();
 
-        // Check if FollowUserV3 plugin is enabled and get follow state
-        const followUserEnabled = isPluginEnabled("FollowUserV3");
+        // Check if FollowUser plugin is enabled and get follow state
+        const followUserEnabled = isPluginEnabled("FollowUser");
         const currentUserId = UserStore.getCurrentUser()?.id;
 
-        // Safely access FollowUserV3 settings
+        // Safely access FollowUser settings
         let followUserId = "";
         let canShowFollow = false;
         if (followUserEnabled) {
             try {
                 // Try accessing via Settings.plugins
-                const followUserSettings = Settings.plugins?.FollowUserV3;
+                const followUserSettings = Settings.plugins?.FollowUser;
                 if (followUserSettings) {
                     followUserId = followUserSettings.followUserId || "";
                     canShowFollow = log.userId !== currentUserId && log.userId !== undefined;
@@ -936,7 +936,7 @@ function LogEntryRow({ log, onCloseModal, onFilterToUser, onSetSearchTerm, onHid
                     canShowFollow = log.userId !== currentUserId && log.userId !== undefined;
                 }
             } catch (error) {
-                logger.warn("Failed to access FollowUserV3 settings:", error);
+                logger.warn("Failed to access FollowUser settings:", error);
                 // Still show menu item even if settings access fails
                 canShowFollow = log.userId !== currentUserId && log.userId !== undefined;
             }
@@ -984,35 +984,45 @@ function LogEntryRow({ log, onCloseModal, onFilterToUser, onSetSearchTerm, onHid
                             try {
                                 // Toggle follow state
                                 if (isFollowed) {
-                                    if (Settings.plugins?.FollowUserV3) {
-                                        Settings.plugins.FollowUserV3.followUserId = "";
+                                    if (Settings.plugins?.FollowUser) {
+                                        Settings.plugins.FollowUser.followUserId = "";
                                         SettingsStore.markAsChanged();
                                     }
                                     showToast("Stopped following user", Toasts.Type.SUCCESS);
                                 } else {
-                                    if (Settings.plugins?.FollowUserV3) {
-                                        Settings.plugins.FollowUserV3.followUserId = log.userId;
+                                    if (Settings.plugins?.FollowUser) {
+                                        Settings.plugins.FollowUser.followUserId = log.userId;
                                         SettingsStore.markAsChanged();
                                     } else {
                                         // Initialize plugin settings if they don't exist
-                                        if (!Settings.plugins.FollowUserV3) {
-                                            Settings.plugins.FollowUserV3 = { followUserId: log.userId } as any;
+                                        if (!Settings.plugins.FollowUser) {
+                                            Settings.plugins.FollowUser = { followUserId: log.userId } as any;
                                         } else {
-                                            Settings.plugins.FollowUserV3.followUserId = log.userId;
+                                            Settings.plugins.FollowUser.followUserId = log.userId;
                                         }
                                         SettingsStore.markAsChanged();
                                     }
                                     // Optionally trigger follow action if executeOnFollow is enabled
-                                    const executeOnFollow = Settings.plugins?.FollowUserV3?.executeOnFollow ?? true;
+                                    const executeOnFollow = Settings.plugins?.FollowUser?.executeOnFollow ?? true;
                                     if (executeOnFollow && ChannelActions && VoiceStateStore) {
-                                        // Get user's current channel
-                                        const states = VoiceStateStore.getAllVoiceStates();
+                                        // Get user's current channel (using same method as FollowUser plugin)
                                         let userChannelId: string | null = null;
-                                        for (const users of Object.values(states) as any[]) {
-                                            if (users && users[log.userId]) {
-                                                userChannelId = users[log.userId].channelId ?? null;
-                                                break;
+                                        try {
+                                            // Try the simpler method first (if available)
+                                            if (VoiceStateStore.getVoiceStateForUser) {
+                                                userChannelId = VoiceStateStore.getVoiceStateForUser(log.userId)?.channelId ?? null;
+                                            } else {
+                                                // Fallback to the more complex method
+                                                const states = VoiceStateStore.getAllVoiceStates();
+                                                for (const users of Object.values(states) as any[]) {
+                                                    if (users && users[log.userId]) {
+                                                        userChannelId = users[log.userId].channelId ?? null;
+                                                        break;
+                                                    }
+                                                }
                                             }
+                                        } catch (error) {
+                                            logger.warn("Failed to get user's voice channel:", error);
                                         }
                                         if (userChannelId) {
                                             const myChanId = SelectedChannelStore.getVoiceChannelId();
@@ -2360,7 +2370,7 @@ function VoiceLoggerHeaderButton() {
         if (e.button === 1) { // Middle mouse button
             e.preventDefault();
             e.stopPropagation();
-            const plugin = plugins.VoiceChannelLoggerMinimalV2;
+            const plugin = plugins.VoiceChannelLogger;
             if (plugin) {
                 openPluginModal(plugin);
             }
@@ -2604,6 +2614,14 @@ export default definePlugin({
             },
             // Make patch optional to prevent plugin loading failure
             noWarn: true
+        },
+        {
+            find: /toolbar:\i,mobileToolbar:\i/,
+            replacement: {
+                match: /(function \i\(\i\){)(.{1,200}toolbar.{1,100}mobileToolbar)/,
+                replace: "$1$self.addIconToToolBar(arguments[0]);$2"
+            },
+            noWarn: true
         }
     ],
 
@@ -2620,6 +2638,27 @@ export default definePlugin({
             logger.error("HeaderFragmentWrapper error boundary:", error);
         }
     }),
+
+    VoiceLoggerIndicator() {
+        return <VoiceLoggerHeaderButton />;
+    },
+
+    addIconToToolBar(e: { toolbar: React.ReactNode[] | React.ReactNode; }) {
+        if (Array.isArray(e.toolbar)) {
+            e.toolbar.unshift(
+                <ErrorBoundary noop={true} key="voice-logger-indicator">
+                    <this.VoiceLoggerIndicator/>
+                </ErrorBoundary>
+            );
+        } else {
+            e.toolbar = [
+                <ErrorBoundary noop={true} key="voice-logger-indicator">
+                    <this.VoiceLoggerIndicator />
+                </ErrorBoundary>,
+                e.toolbar,
+            ];
+        }
+    },
 
     contextMenus: {
         "user-context": userContextMenuPatch
