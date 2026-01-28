@@ -428,16 +428,6 @@ const settings = definePluginSettings({
         description: "Log your own voice channel actions",
         default: false,
     },
-    onlyLogJoins: {
-        type: OptionType.BOOLEAN,
-        description: "Only log when users join your channel (ignore leaves)",
-        default: false,
-    },
-    userFilter: {
-        type: OptionType.STRING,
-        description: "Only log specific users (comma-separated user IDs, leave empty for all)",
-        default: "",
-    },
 
     // Notification Settings
     showToastNotifications: {
@@ -635,14 +625,6 @@ async function logUsersAlreadyInChannel(channelId: string, currentUserId: string
         for (const userId of Object.keys(voiceStates)) {
             // Skip the current user
             if (userId === currentUserId) continue;
-
-            // Apply user filtering if configured
-            if (settings.store.userFilter && settings.store.userFilter.trim()) {
-                const allowedUsers = settings.store.userFilter.split(",").map(id => id.trim());
-                if (!allowedUsers.includes(userId)) {
-                    continue;
-                }
-            }
 
             try {
                 const user = await getEnhancedUserData(userId);
@@ -2648,7 +2630,7 @@ export default definePlugin({
         if (Array.isArray(e.toolbar)) {
             e.toolbar.unshift(
                 <ErrorBoundary noop={true} key="voice-logger-indicator">
-                    <this.VoiceLoggerIndicator/>
+                    <this.VoiceLoggerIndicator />
                 </ErrorBoundary>
             );
         } else {
@@ -2792,15 +2774,6 @@ export default definePlugin({
                             continue;
                         }
 
-                        // Apply user filtering if configured
-                        if (settings.store.userFilter && settings.store.userFilter.trim()) {
-                            const allowedUsers = settings.store.userFilter.split(",").map(id => id.trim());
-                            if (!allowedUsers.includes(userId)) {
-                                eventsSkipped++;
-                                continue;
-                            }
-                        }
-
                         // Check if this event relates to our current voice channel
                         const joiningMyChannel = channelId === myChannelId;
                         const leavingMyChannel = oldChannelId === myChannelId;
@@ -2820,12 +2793,6 @@ export default definePlugin({
                         }
 
                         if (!action) {
-                            eventsSkipped++;
-                            continue;
-                        }
-
-                        // Apply "joins only" filter if enabled
-                        if (settings.store.onlyLogJoins && action === "leave") {
                             eventsSkipped++;
                             continue;
                         }
