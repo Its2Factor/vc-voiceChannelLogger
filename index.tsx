@@ -17,7 +17,7 @@ import { Logger } from "@utils/Logger";
 import { ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Avatar, Button, ChannelStore, ContextMenuApi, GuildStore, Menu, PermissionsBits, PermissionStore, React, ScrollerThin, SelectedChannelStore, showToast, Text, Toasts, UserStore, useState } from "@webpack/common";
+import { Avatar, Button, ChannelStore, ContextMenuApi, GuildStore, Menu, PermissionsBits, PermissionStore, React, ScrollerThin, SelectedChannelStore, showToast, Text, Toasts, Tooltip, UserStore, useState } from "@webpack/common";
 import type { ReactNode } from "react";
 
 // CSS animations for smooth transitions and effects
@@ -461,11 +461,6 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "Number of logs to display per page (lower = better performance)",
         default: 50,
-    },
-    useRelativeTime: {
-        type: OptionType.BOOLEAN,
-        description: "Display timestamps as relative time (e.g., '2 hours ago') instead of absolute time",
-        default: true,
     },
     colorStatisticsByFilter: {
         type: OptionType.BOOLEAN,
@@ -1157,7 +1152,13 @@ function LogEntryRow({ log, onCloseModal, onFilterToUser, onSetSearchTerm, onHid
 
             {/* Timestamp on the Right */}
             <div className="vc-vcl-modal-log-entry-timestamp">
-                {settings.store.useRelativeTime ? formatRelativeTime(log.timestamp) : formatTimestamp(log.timestamp)}
+                <Tooltip text={formatTimestamp(log.timestamp)}>
+                    {props => (
+                        <span {...props}>
+                            {formatRelativeTime(log.timestamp)}
+                        </span>
+                    )}
+                </Tooltip>
             </div>
         </div>
     );
